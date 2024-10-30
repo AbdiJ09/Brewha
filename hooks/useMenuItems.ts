@@ -1,15 +1,8 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/clerk-expo";
 import ProfileMenu from "@/components/profile/ProfileMenu";
 
 export const useMenuItems = () => {
   const [isLogoutAlertVisible, setIsLogoutAlertVisible] = useState(false);
-  const { signOut } = useAuth();
-
-  const confirmLogout = async () => {
-    await signOut();
-  };
-
   const menuItems: ProfileMenu[] = [
     {
       icon: "notifications-outline",
@@ -31,11 +24,7 @@ export const useMenuItems = () => {
       label: "Payment Method",
       url: "/profile",
     },
-    {
-      icon: "car-outline",
-      label: "My Trips",
-      url: "/profile",
-    },
+
     {
       icon: "gift-outline",
       label: "Refer & Get Discount",
@@ -53,6 +42,5 @@ export const useMenuItems = () => {
     menuItems,
     isLogoutAlertVisible,
     setIsLogoutAlertVisible,
-    confirmLogout,
   };
 };

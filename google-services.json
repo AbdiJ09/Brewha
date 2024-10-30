@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "908019272212",
+    "project_id": "brewha-c26d0",
+    "storage_bucket": "brewha-c26d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908019272212:android:93d7f93b7851ef1a62f501",
+        "android_client_info": {
+          "package_name": "com.abdij09.brewha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "908019272212-oeghlu1ifhalt6gujg71pkfltrbikdkj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.abdij09.brewha",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "908019272212-llap5mv3cugitd64k8k486t46013739a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt-h_PnxaV1TtqqaGMa4jmzAtq27k_Nps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "908019272212-llap5mv3cugitd64k8k486t46013739a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

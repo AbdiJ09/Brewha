@@ -1,115 +1,94 @@
-import React, {
-  useContext,
-  createContext,
-  type PropsWithChildren,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import * as SecureStore from "expo-secure-store";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { Platform } from "react-native";
 
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  picture?: string;
-};
-
-type AuthContextType = {
-  signIn: (
-    accessToken: string,
-    refreshToken: string,
-    user: User
-  ) => Promise<void>;
-  signOut: () => Promise<void>;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: User | null;
-  accessToken: string | null;
-};
-
-const AuthContext = createContext<AuthContextType>({
-  signIn: async () => {},
-  signOut: async () => {},
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
-  accessToken: null,
-});
-
-export function useAuth() {
-  return useContext(AuthContext);
+interface AuthContextType {
+  user: FirebaseAuthTypes.User | null;
+  initializing: boolean;
+  onLogout: () => Promise<void>;
 }
 
-export function AuthProvider({ children }: PropsWithChildren) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on app start
-    const checkSession = async () => {
-      try {
-        const storedAccessToken = await SecureStore.getItemAsync("accessToken");
-        const storedUser = await SecureStore.getItemAsync("user");
+    let timeout: NodeJS.Timeout | null = null;
+    let isSubscribed = true;
 
-        if (storedAccessToken && storedUser) {
-          setAccessToken(storedAccessToken);
-          setUser(JSON.parse(storedUser));
-          setIsAuthenticated(true);
+    const initializeUser = async () => {
+      try {
+        const currentUser = auth().currentUser;
+
+        if (currentUser && isSubscribed) {
+          setUser(currentUser);
+          setInitializing(false);
         }
+
+        const unsubscribe = auth().onAuthStateChanged((user) => {
+          if (!isSubscribed) {
+            return;
+          }
+          setUser(user);
+          setInitializing(false);
+          if (timeout) {
+            clearTimeout(timeout);
+            timeout = null;
+          }
+        });
+
+        if (Platform.OS === "android") {
+          timeout = setTimeout(() => {
+            if (!isSubscribed) {
+              return;
+            }
+            setInitializing(false);
+            const timeoutUser = auth().currentUser;
+            if (timeoutUser && isSubscribed) {
+              setUser(timeoutUser);
+            }
+          }, 2000);
+        }
+
+        return unsubscribe;
       } catch (error) {
-        console.error("Error checking session:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Auth initialization error:", error);
+        if (isSubscribed) {
+          setInitializing(false);
+        }
+        return () => {};
       }
     };
 
-    checkSession();
-  }, []);
+    let unsubscribe: (() => void) | undefined;
+    initializeUser().then((cleanup) => {
+      unsubscribe = cleanup;
+    });
 
-  const signIn = useCallback(
-    async (accessToken: string, refreshToken: string, user: User) => {
-      try {
-        await SecureStore.setItemAsync("accessToken", accessToken);
-        await SecureStore.setItemAsync("refreshToken", refreshToken);
-        await SecureStore.setItemAsync("user", JSON.stringify(user));
-
-        setAccessToken(accessToken);
-        setUser(user);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error during sign in:", error);
-        throw error;
+    return () => {
+      isSubscribed = false;
+      if (timeout) {
+        clearTimeout(timeout);
       }
-    },
-    []
-  );
-
-  const signOut = useCallback(async () => {
-    try {
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
-      await SecureStore.deleteItemAsync("user");
-
-      setAccessToken(null);
-      setUser(null);
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error("Error during sign out:", error);
-      throw error;
-    }
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
-  const value = {
-    isAuthenticated,
-    isLoading,
-    user,
-    accessToken,
-    signIn,
-    signOut,
+  const onLogout = async () => {
+    await auth().signOut();
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+  return <AuthContext.Provider value={{ user, initializing, onLogout }}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

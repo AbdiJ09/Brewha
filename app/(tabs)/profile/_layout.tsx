@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
+import { Href, Link, router, Stack } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileLayout() {
@@ -29,6 +29,20 @@ export default function ProfileLayout() {
               <Text className="ml-4 text-lg font-[Manrope-SemiBold] text-foregroundText">Profile</Text>
             </View>
           ),
+          headerRight: () => (
+            <Link
+              href={"/profile/(menu-items)/menu-settings" as Href}
+              asChild
+            >
+              <TouchableOpacity className="mr-2">
+                <Ionicons
+                  name="menu-sharp"
+                  size={24}
+                  color={Colors.text}
+                />
+              </TouchableOpacity>
+            </Link>
+          ),
         }}
       />
       <Stack.Screen
@@ -48,11 +62,23 @@ export default function ProfileLayout() {
         }}
       />
       <Stack.Screen
+        name="(menu-items)/menu-settings"
+        options={{
+          title: "Settings & Privacy",
+          headerStyle: { backgroundColor: Colors.background },
+          headerTintColor: Colors.text,
+          headerShadowVisible: false,
+          headerShown: true,
+          presentation: "modal",
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
         name="(menu-items)/logout"
         options={{
+          headerShown: false,
           presentation: "transparentModal",
           animation: "fade",
-          headerShown: false,
         }}
       />
     </Stack>

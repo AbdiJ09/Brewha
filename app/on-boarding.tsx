@@ -1,6 +1,5 @@
-import React from "react";
-import { OnBoardingScreen } from "@/components/screens/OnBoarding";
+import { OnBoardingScreen } from "@/screens/OnBoarding";
 
-export default function OnBoarding() {
+export default function Page() {
   return <OnBoardingScreen />;
 }

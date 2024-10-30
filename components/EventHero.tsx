@@ -14,7 +14,7 @@ export const EventHero = () => {
       title: "Event 1",
       higlight: "OFF 20%",
       date: "2023-04-01",
-      image: require("@/assets/images/coffee-event1.png"),
+      image: require("@/assets/images/coffee_event1.png"),
     },
   ];
 
@@ -69,11 +69,7 @@ export const EventHero = () => {
   });
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
+    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
 
     const opacity = scrollX.interpolate({
       inputRange,
@@ -103,16 +99,10 @@ export const EventHero = () => {
       >
         <View className="relative p-4 m-5 overflow-hidden bg-accent-900 rounded-3xl">
           <View>
-            <Text className="text-sm uppercase text-neutral-500 font-[Manrope-SemiBold]">
-              {item.title}
-            </Text>
-            <Text className="text-3xl mt-5 text-neutral-900 font-[Manrope-ExtraBold]">
-              {item.higlight}
-            </Text>
+            <Text className="text-sm uppercase text-neutral-500 font-[Manrope-SemiBold]">{item.title}</Text>
+            <Text className="text-3xl mt-5 text-neutral-900 font-[Manrope-ExtraBold]">{item.higlight}</Text>
             <TouchableOpacity className="w-32 p-5 mt-5 rounded-full bg-primary-500">
-              <Text className="text-sm text-foregroundText text-center font-[Manrope-Bold]">
-                Get Event
-              </Text>
+              <Text className="text-sm text-foregroundText text-center font-[Manrope-Bold]">Get Event</Text>
             </TouchableOpacity>
           </View>
           <Image
@@ -137,10 +127,7 @@ export const EventHero = () => {
       onScrollBeginDrag={onScrollBeginDrag}
       getItemLayout={getItemLayout}
       renderItem={renderItem}
-      onScroll={Animated.event(
-        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-        { useNativeDriver: true }
-      )}
+      onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
       scrollEventThrottle={16}
       decelerationRate="fast"
       snapToInterval={width}

@@ -1,42 +1,13 @@
-import {
-  View,
-  Text,
-  Platform,
-  StyleSheet,
-  Animated,
-  Dimensions,
-} from "react-native";
+import { Platform, StyleSheet, Animated, Dimensions } from "react-native";
 import React, { useRef, useEffect } from "react";
-import {
-  Redirect,
-  Tabs,
-  usePathname,
-  useRootNavigationState,
-  useRouter,
-} from "expo-router";
-import { useColorScheme } from "nativewind";
+import { Tabs, usePathname } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { BlurView } from "expo-blur";
-import {
-  useIsFocused,
-  useNavigationState,
-  useRoute,
-} from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
 
 // Importing outline and solid icons
-import {
-  HomeIcon,
-  UserIcon,
-  BookmarkIcon,
-  MagnifyingGlassIcon,
-} from "react-native-heroicons/outline";
-import {
-  HomeIcon as HomeIconSolid,
-  UserIcon as UserIconSolid,
-  BookmarkIcon as BookmarkIconSolid,
-  MagnifyingGlassCircleIcon as MagnifyingGlassIconSolid,
-} from "react-native-heroicons/solid";
-import { useAuth } from "@clerk/clerk-expo";
+import { HomeIcon, UserIcon, BookmarkIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
+import { HomeIcon as HomeIconSolid, UserIcon as UserIconSolid, BookmarkIcon as BookmarkIconSolid, MagnifyingGlassCircleIcon as MagnifyingGlassIconSolid } from "react-native-heroicons/solid";
 
 interface TabIconProps {
   iconOutline: React.ComponentType<any>;
@@ -45,12 +16,7 @@ interface TabIconProps {
   focused: boolean;
 }
 
-const TabIcon = ({
-  iconOutline: IconOutline,
-  iconSolid: IconSolid,
-  color,
-  focused,
-}: TabIconProps) => {
+const TabIcon = ({ iconOutline: IconOutline, iconSolid: IconSolid, color, focused }: TabIconProps) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const isFocused = useIsFocused();
@@ -73,9 +39,7 @@ const TabIcon = ({
     <Animated.View
       style={{
         transform: [{ scale: scaleAnim }],
-        backgroundColor: isFocused
-          ? Colors.primary[500]
-          : Colors.secondary[400],
+        backgroundColor: isFocused ? Colors.primary[500] : Colors.secondary[400],
         borderRadius: 50,
         alignItems: "center",
         justifyContent: "center",
@@ -84,9 +48,15 @@ const TabIcon = ({
       }}
     >
       {focused ? (
-        <IconSolid size={24} color={color} />
+        <IconSolid
+          size={24}
+          color={color}
+        />
       ) : (
-        <IconOutline size={24} color={color} />
+        <IconOutline
+          size={24}
+          color={color}
+        />
       )}
     </Animated.View>
   );

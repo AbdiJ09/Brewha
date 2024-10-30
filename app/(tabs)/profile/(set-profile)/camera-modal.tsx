@@ -4,16 +4,12 @@ import { CameraView, CameraType, FlashMode } from "expo-camera";
 import { router } from "expo-router";
 import Animated, { SlideInDown, useAnimatedStyle, withTiming, useSharedValue, withSequence, withRepeat, runOnJS } from "react-native-reanimated";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useUser } from "@clerk/clerk-expo";
 import { useMutation } from "@tanstack/react-query";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ImageEditor from "@/components/ImageEditor";
+import { useAuth } from "@/context/AuthContext";
 
-const uploadImage = async (user: any, uri: string) => {
-  await user.setProfileImage({
-    file: uri,
-  });
-};
+const uploadImage = async (user: any, uri: string) => {};
 
 const LoadingSpinner = () => {
   const rotation = useSharedValue(0);
@@ -40,7 +36,7 @@ const LoadingSpinner = () => {
 };
 
 const CameraModal = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [cameraViewRef, setCameraViewRef] = useState<CameraView | null>(null);

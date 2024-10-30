@@ -4,10 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { useUser } from "@clerk/clerk-expo";
-import { ImageResult } from "expo-image-manipulator";
 import ImageEditor from "@/components/ImageEditor";
 import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 type Album = {
   id: string;
@@ -19,7 +18,7 @@ type Album = {
 type Tab = "recent" | "gallery";
 
 export default function GalleryModal() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [mediaAssets, setMediaAssets] = useState<MediaLibrary.Asset[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -161,7 +160,7 @@ export default function GalleryModal() {
 
   const saveImage = async (uri: string) => {
     try {
-      await user?.setProfileImage({ file: uri });
+      // await user?.setProfileImage({ file: uri });
     } catch (error) {
       console.error("Error saving image:", error);
     }

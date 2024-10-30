@@ -13,22 +13,18 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.abdij09.brewha"
     },
     "android": {
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/adaptive_icon.png",
+        "backgroundColor": "#181818"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.abdij09.brewha",
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.ACCESS_MEDIA_LOCATION"
-      ]
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.ACCESS_MEDIA_LOCATION"]
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +34,9 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/auth",
       [
         "expo-camera",
         {
@@ -57,10 +56,15 @@
       [
         "expo-asset",
         {
-          "assets": [
-            "./assets/images/splash.png",
-            "./assets/images/"
-          ]
+          "assets": ["./assets/images/splash.png", "./assets/images/"]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
         }
       ]
     ],

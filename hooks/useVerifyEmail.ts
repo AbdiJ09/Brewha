@@ -27,7 +27,7 @@ export const useVerifyEmail = () => {
 
   const verifyMutation = useMutation<void, ClerkAPIError[], string>({
     mutationFn: async (fullOtp: string) => {
-      if (!isLoaded) throw new Error("Clerk is not loaded");
+      if (!isLoaded) return;
 
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: fullOtp,
@@ -49,8 +49,7 @@ export const useVerifyEmail = () => {
 
   const resendMutation = useMutation<void, Error>({
     mutationFn: async () => {
-      if (!isLoaded || !canResend)
-        throw new Error("Cannot resend at this time");
+      if (!isLoaded || !canResend) throw new Error("Cannot resend at this time");
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setTimer(60);

@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth } from "@/context/AuthContext";
 
 const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
-  const { user } = useUser();
+  const { user } = useAuth();
   return (
     <View style={{ height: 250 }}>
       <LinearGradient
@@ -18,7 +18,7 @@ const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
         <View className="items-center p-6 mb-10">
           <View className="relative">
             <Image
-              source={user?.hasImage ? { uri: user?.imageUrl } : { uri: "https://avatar.iran.liara.run/public/26" }}
+              source={user?.photoURL ? { uri: user?.photoURL } : { uri: "https://avatar.iran.liara.run/public/26" }}
               className="w-24 h-24 border-4 border-white rounded-full"
             />
             <TouchableOpacity
@@ -32,8 +32,8 @@ const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
               />
             </TouchableOpacity>
           </View>
-          <Text className="mt-2 text-xl font-[Manrope-Bold] text-foregroundText">{user?.fullName}</Text>
-          <Text className="text-sm font-[Manrope-Regular] text-foregroundText">{user?.primaryEmailAddress?.emailAddress}</Text>
+          <Text className="mt-2 text-xl font-[Manrope-Bold] text-foregroundText">{user?.displayName ? user?.displayName : user?.email}</Text>
+          <Text className="text-sm font-[Manrope-Regular] text-foregroundText">{user?.email}</Text>
         </View>
       </LinearGradient>
     </View>
