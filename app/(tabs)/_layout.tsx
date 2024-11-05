@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, Animated, Dimensions } from "react-native";
 import React, { useRef, useEffect } from "react";
-import { Tabs, usePathname } from "expo-router";
+import { Redirect, Tabs, usePathname } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { BlurView } from "expo-blur";
 import { useIsFocused } from "@react-navigation/native";
@@ -8,7 +8,8 @@ import { useIsFocused } from "@react-navigation/native";
 // Importing outline and solid icons
 import { HomeIcon, UserIcon, BookmarkIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import { HomeIcon as HomeIconSolid, UserIcon as UserIconSolid, BookmarkIcon as BookmarkIconSolid, MagnifyingGlassCircleIcon as MagnifyingGlassIconSolid } from "react-native-heroicons/solid";
-
+import { useAuth } from "@/context/AuthContext";
+import Reanimated, { FadeIn } from "react-native-reanimated";
 interface TabIconProps {
   iconOutline: React.ComponentType<any>;
   iconSolid: React.ComponentType<any>;
@@ -63,6 +64,8 @@ const TabIcon = ({ iconOutline: IconOutline, iconSolid: IconSolid, color, focuse
 };
 
 const TabsLayout = () => {
+  const { user } = useAuth();
+  if (!user) <Redirect href={"/(auth)/sign-in"} />;
   const pathname = usePathname();
   const tabsItems = [
     { name: "home", iconOutline: HomeIcon, iconSolid: HomeIconSolid },
@@ -80,62 +83,67 @@ const TabsLayout = () => {
   ];
   const SCREEN_WIDTH = Dimensions.get("window").width;
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: Colors.text,
-        tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
-        tabBarStyle: {
-          display: pathname.startsWith("/profile") ? "none" : "flex",
-          position: "absolute",
-          bottom: 30,
-          width: SCREEN_WIDTH - 100,
-          left: 50,
-          right: 50,
-          height: 70,
-          borderRadius: 50,
-          overflow: "hidden",
-          borderColor: "transparent",
-          shadowOffset: { width: 0, height: -4 },
-          elevation: 0,
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-        },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={Platform.OS === "ios" ? 80 : 0}
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              borderRadius: 50,
-              borderColor: "rgba(0,0,0,0.1)",
-              borderWidth: 1,
-              overflow: "hidden",
-            }}
-            className="bg-secondary-500/90"
-          />
-        ),
-      }}
+    <Reanimated.View
+      className="flex-1"
+      entering={FadeIn}
     >
-      {tabsItems.map((item, index) => (
-        <Tabs.Screen
-          key={index}
-          name={item.name}
-          options={{
-            title: item.name,
-            headerShown: false,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                iconOutline={item.iconOutline}
-                iconSolid={item.iconSolid}
-                color={color}
-                focused={focused}
-              />
-            ),
-          }}
-        />
-      ))}
-    </Tabs>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: Colors.text,
+          tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
+          tabBarStyle: {
+            display: pathname.startsWith("/profile") ? "none" : "flex",
+            position: "absolute",
+            bottom: 30,
+            width: SCREEN_WIDTH - 100,
+            left: 50,
+            right: 50,
+            height: 70,
+            borderRadius: 50,
+            overflow: "hidden",
+            borderColor: "transparent",
+            shadowOffset: { width: 0, height: -4 },
+            elevation: 0,
+            backgroundColor: "transparent",
+            borderTopWidth: 0,
+          },
+          tabBarBackground: () => (
+            <BlurView
+              intensity={Platform.OS === "ios" ? 80 : 0}
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                borderRadius: 50,
+                borderColor: "rgba(0,0,0,0.1)",
+                borderWidth: 1,
+                overflow: "hidden",
+              }}
+              className="bg-secondary-500/90"
+            />
+          ),
+        }}
+      >
+        {tabsItems.map((item, index) => (
+          <Tabs.Screen
+            key={index}
+            name={item.name}
+            options={{
+              title: item.name,
+              headerShown: false,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  iconOutline={item.iconOutline}
+                  iconSolid={item.iconSolid}
+                  color={color}
+                  focused={focused}
+                />
+              ),
+            }}
+          />
+        ))}
+      </Tabs>
+    </Reanimated.View>
   );
 };
 

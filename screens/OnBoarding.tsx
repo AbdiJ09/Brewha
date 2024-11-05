@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
 import SlideContent from "@/components/on-boarding/SlideContent";
 import Svg from "@/assets/svg/ilustration1.svg";
@@ -6,7 +6,7 @@ import Svg2 from "@/assets/svg/ilustration2.svg";
 import Svg3 from "@/assets/svg/ilustration3.svg";
 import { Colors } from "@/constants/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NavigateSlide from "@/components/on-boarding/NavigateSlide";
 
@@ -79,7 +79,7 @@ export const OnBoardingScreen = () => {
   const handleNext = async () => {
     if (currentSlide === slides.length - 1) {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-      router.push("/sign-in");
+      router.push("/(auth)");
     } else {
       animateSlideChange("next");
     }
@@ -90,6 +90,7 @@ export const OnBoardingScreen = () => {
       animateSlideChange("prev");
     }
   };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors.background, position: "relative" }]}>
       <Animated.View style={styles.container}>

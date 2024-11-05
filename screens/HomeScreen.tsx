@@ -6,6 +6,7 @@ import { HomeHeader } from "@/components/home/HomeHeader";
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { ArrowRightIcon, ArrowUpRightIcon, MapPinIcon } from "react-native-heroicons/outline";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export const HomeScreen = () => {
   const dataShop = [
@@ -57,8 +58,8 @@ export const HomeScreen = () => {
       className="flex-1"
       style={{ backgroundColor: Colors.background }}
     >
-      <HomeHeader />
       <ScrollView>
+        <HomeHeader />
         <View>
           <EventHero />
 

@@ -2,14 +2,15 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@/context/AuthContext";
+import { useUserProfileQuery } from "@/hooks/useUserProfileQuery";
+import { Colors } from "@/constants/Colors";
 
 const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
-  const { user } = useAuth();
+  const { data: userProfile } = useUserProfileQuery();
   return (
     <View style={{ height: 250 }}>
       <LinearGradient
-        colors={linearGradientColors}
+        colors={[Colors.background, Colors.background]}
         style={{
           flex: 1,
           justifyContent: "flex-end",
@@ -18,7 +19,7 @@ const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
         <View className="items-center p-6 mb-10">
           <View className="relative">
             <Image
-              source={user?.photoURL ? { uri: user?.photoURL } : { uri: "https://avatar.iran.liara.run/public/26" }}
+              source={userProfile?.photoURL ? { uri: userProfile?.photoURL } : { uri: "https://avatar.iran.liara.run/public/26" }}
               className="w-24 h-24 border-4 border-white rounded-full"
             />
             <TouchableOpacity
@@ -32,8 +33,8 @@ const ProfileHeader = ({ linearGradientColors, openBottomSheet }: any) => {
               />
             </TouchableOpacity>
           </View>
-          <Text className="mt-2 text-xl font-[Manrope-Bold] text-foregroundText">{user?.displayName ? user?.displayName : user?.email}</Text>
-          <Text className="text-sm font-[Manrope-Regular] text-foregroundText">{user?.email}</Text>
+          <Text className="mt-2 text-xl font-[Manrope-Bold] text-foregroundText">{userProfile?.name ? userProfile?.name : userProfile?.email}</Text>
+          <Text className="text-sm font-[Manrope-Regular] text-foregroundText">{userProfile?.email}</Text>
         </View>
       </LinearGradient>
     </View>

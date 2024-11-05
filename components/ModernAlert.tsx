@@ -1,11 +1,4 @@
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-} from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useEffect, useState } from "react";
 
@@ -19,15 +12,7 @@ interface ModernAlertProps {
   confirmText?: string;
 }
 
-const ModernAlert: React.FC<ModernAlertProps> = ({
-  visible,
-  title,
-  message,
-  onCancel,
-  onConfirm,
-  cancelText = "Cancel",
-  confirmText = "Confirm",
-}) => {
+const ModernAlert: React.FC<ModernAlertProps> = ({ visible, title, message, onCancel, onConfirm, cancelText = "Cancel", confirmText = "Confirm" }) => {
   const [animation] = useState(new Animated.Value(0));
 
   useEffect(() => {
@@ -40,31 +25,30 @@ const ModernAlert: React.FC<ModernAlertProps> = ({
 
   const backgroundColor = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.5)"],
-  });
-
-  const scale = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.9, 1],
+    outputRange: ["rgba(0, 0, 0, 0.5)", "rgba(0, 0, 0, 0.5)"],
   });
 
   return (
-    <Modal transparent visible={visible}>
+    <Modal
+      transparent
+      visible={visible}
+    >
       <Animated.View style={[styles.container, { backgroundColor }]}>
-        <Animated.View style={[styles.alert, { transform: [{ scale }] }]}>
+        <Animated.View style={[styles.alert]}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={onCancel}>
-              <Text style={styles.buttonText}>{cancelText}</Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.confirmButton]}
               onPress={onConfirm}
             >
-              <Text style={[styles.buttonText, styles.confirmButtonText]}>
-                {confirmText}
-              </Text>
+              <Text style={[styles.buttonText, styles.confirmButtonText]}>{confirmText}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={onCancel}
+            >
+              <Text style={styles.buttonText}>{cancelText}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -101,27 +85,30 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   message: {
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: 14,
+    marginBottom: 30,
     textAlign: "center",
     color: Colors.text,
   },
   buttonContainer: {
-    flexDirection: "row",
+    gap: 15,
+    alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
   },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.secondary[500],
+    width: "70%",
+    borderRadius: 15,
   },
   buttonText: {
+    textAlign: "center",
     color: Colors.text,
     fontSize: 16,
   },
   confirmButton: {
+    width: "70%",
     backgroundColor: Colors.primary[500],
   },
   confirmButtonText: {

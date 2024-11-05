@@ -1,99 +1,125 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { SafeAreaView, View, ScrollView, ActivityIndicator, Text } from "react-native";
-import { Formik } from "formik";
-import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
+import React, { useCallback, useState, useEffect, useRef } from "react";
+import { SafeAreaView, View, ScrollView, Text } from "react-native";
+import { Formik, FormikProps } from "formik";
 
 import { AuthFooter } from "@/components/auth/AuthFooter";
-import { Logo } from "@/components/Logo";
 import { HeaderText } from "@/components/auth/HeaderText";
-
 import { SignInForm } from "@/components/auth/SignInForm";
 import { Colors } from "@/constants/Colors";
 import { signInSchema, FormValuesSignIn } from "@/schemas/signInSchema";
-import { useSignIn } from "@/hooks/useSignIn";
 import LoadingScreen from "@/components/LoadingScreen";
-import auth from "@react-native-firebase/auth";
-import { router } from "expo-router";
-
-// Custom hook to warm up the Web Browser
-export const useWarmUpBrowser = () => {
-  useEffect(() => {
-    void WebBrowser.warmUpAsync();
-    return () => {
-      void WebBrowser.coolDownAsync();
-    };
-  }, []);
-};
-
-// Complete the auth session if needed
-WebBrowser.maybeCompleteAuthSession();
+import { router, useLocalSearchParams } from "expo-router";
+import { useAuthMutations } from "@/hooks/useAuthMutations";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import CustomModal from "@/components/ModalCustom";
+import { useModal } from "@/context/ModalContext";
+import { useAuth } from "@/context/AuthContext";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 export const SignInScreen: React.FC = () => {
-  // Warm up the browser
-  useWarmUpBrowser();
-  const [oauthLoading, setOauthLoading] = useState(false);
-  // Hooks for sign-in logic
-  const { handleSignIn, isLoading } = useSignIn();
+  const { email } = useLocalSearchParams<{ email: string }>();
+  const [showModalAlert, setShowModalAlert] = useState<boolean>(false);
+  const { top } = useSafeAreaInsets();
+  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
+  const { emailLoginMutation, googleLoginMutation } = useAuthMutations();
+  const { showModal } = useModal();
+  const { setUser } = useAuth();
 
-  // Initial values for Formik
   const initialValues: FormValuesSignIn = { identifier: "", password: "" };
 
-  // Handle form submission
   const onSubmit = async (values: FormValuesSignIn) => {
-    try {
-      await auth().signInWithEmailAndPassword(values.identifier, values.password);
+    const res = await emailLoginMutation.mutateAsync(values);
+    if (res.emailVerified && res.loginSuccess) {
       router.replace("/home");
-    } catch (error) {
-      console.log(error);
+    } else {
+      showModal({
+        icon: "info",
+        title: "Email not verified",
+        message: "Please check your email to verify your account",
+        buttonStyle: { marginTop: 10 },
+      });
     }
   };
 
-  // Handle OAuth authentication
-  const handleOAuth = useCallback(async (strategy: "oauth_apple" | "oauth_google") => {}, []);
+  const handleOAuth = useCallback(async () => {
+    try {
+      const res = await googleLoginMutation.mutateAsync();
+      if (res) {
+        if (res.needsLinking) {
+          setGoogleEmail(res.email);
+          setShowModalAlert(true);
+          return;
+        }
+
+        setUser(res.user as FirebaseAuthTypes.User);
+        router.replace("/home");
+      }
+    } catch (error) {
+      console.log("🚀 ~ handleOAuth ~ error:", error);
+    }
+  }, []);
+
+  const handleConfirmAlert = (setFieldValue: (field: string, value: string) => void) => {
+    if (googleEmail) {
+      setFieldValue("identifier", googleEmail);
+    }
+    setShowModalAlert(false);
+  };
+  const formikRef = useRef<FormikProps<FormValuesSignIn>>(null);
+  useEffect(() => {
+    if (email && formikRef.current) {
+      formikRef.current.setFieldValue("identifier", email);
+    }
+  }, [email]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background, paddingTop: top }}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps="handled"
       >
-        <View
-          className="p-6"
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            backgroundColor: Colors.background,
-          }}
-        >
-          <Logo />
+        <View className="px-6">
           <HeaderText
             title="Welcome Back"
-            description="Sign in to find cozy spots and favorite cafes near you"
+            description="Please enter your email and password to continue"
           />
 
           <Formik
             initialValues={initialValues}
             validationSchema={signInSchema}
             onSubmit={onSubmit}
+            innerRef={formikRef}
           >
-            {(formikProps) => (
-              <SignInForm
-                {...formikProps}
-                pending={isLoading}
-                handleOAuth={handleOAuth}
-              />
-            )}
+            {(formikProps) => {
+              return (
+                <>
+                  <SignInForm
+                    {...formikProps}
+                    pending={emailLoginMutation.isPending || googleLoginMutation.isPending}
+                    handleOAuth={handleOAuth}
+                  />
+                  <CustomModal
+                    visible={showModalAlert}
+                    onClose={() => setShowModalAlert(false)}
+                    onButtonPress={() => handleConfirmAlert(formikProps.setFieldValue)}
+                    icon="info"
+                    title="Email already in use"
+                    message="Please log in with the email and password that is connected to this account"
+                    buttonStyle={{ marginTop: 10 }}
+                  />
+                </>
+              );
+            }}
           </Formik>
 
           <AuthFooter
             text="Don't have an account?"
             link="/sign-up"
-            label="Sign Up"
+            label="Register"
           />
         </View>
 
-        {isLoading || (oauthLoading && <LoadingScreen />)}
+        {(emailLoginMutation.isPending || googleLoginMutation.isPending) && <LoadingScreen />}
       </ScrollView>
     </SafeAreaView>
   );

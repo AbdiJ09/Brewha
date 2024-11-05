@@ -4,10 +4,6 @@ import auth from "@react-native-firebase/auth";
 import { useAuth } from "@/context/AuthContext";
 export default function Logout() {
   const { onLogout } = useAuth();
-  const handleLogout = async () => {
-    onLogout();
-    router.replace("/sign-in");
-  };
   const onCancel = () => {
     router.back();
   };
@@ -17,7 +13,7 @@ export default function Logout() {
       title="Logout"
       message="Are you sure you want to logout?"
       onCancel={onCancel}
-      onConfirm={handleLogout}
+      onConfirm={() => onLogout()}
       cancelText="Cancel"
       confirmText="Logout"
     />

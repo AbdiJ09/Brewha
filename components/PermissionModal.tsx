@@ -2,8 +2,24 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { PermissionResponse } from "expo-camera";
-
-const CustomPermissionModal = ({ permission, visible, onClose, onGrantPermission, title, description, icon }: { permission: PermissionResponse; visible: boolean; onClose: () => void; onGrantPermission: () => void; title: string; description: string; icon: JSX.Element }) => {
+import MediaLibrary from "expo-media-library";
+const CustomPermissionModal = ({
+  permission,
+  visible,
+  onClose,
+  onGrantPermission,
+  title,
+  description,
+  icon,
+}: {
+  permission: PermissionResponse | MediaLibrary.EXPermissionResponse;
+  visible: boolean;
+  onClose: () => void;
+  onGrantPermission: () => void;
+  title: string;
+  description: string;
+  icon: JSX.Element;
+}) => {
   return (
     <Modal
       visible={visible}

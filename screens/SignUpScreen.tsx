@@ -1,44 +1,79 @@
-import React from "react";
-import { SafeAreaView, View, ScrollView, Text, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView, View, ScrollView } from "react-native";
 import { Formik } from "formik";
 import { Colors } from "@/constants/Colors";
 import { AuthFooter } from "@/components/auth/AuthFooter";
-import { Logo } from "@/components/Logo";
 
 import { HeaderText } from "@/components/auth/HeaderText";
 import { FormValuesSignUp, SignupSchema } from "@/schemas/signUpSchema";
 import { SignUpForm } from "@/components/auth/SignUpForm";
-import { overlayStyles } from "@/styles/overlayStyles";
-import auth from "@react-native-firebase/auth";
-export const SignUpScreen: React.FC = () => {
+import { useAuthMutations } from "@/hooks/useAuthMutations";
+import { router } from "expo-router";
+import LoadingScreen from "@/components/LoadingScreen";
+import { withModal } from "@/hoc/withModal";
+import { ModalConfig } from "@/types/ModalConfig";
+import { useAuth } from "@/context/AuthContext";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
+interface SignUpProps {
+  showModal?: (config: ModalConfig) => void;
+}
+export const SignUpScreen: React.FC<SignUpProps> = withModal(({ showModal }) => {
+  const { register, googleLoginMutation } = useAuthMutations();
+  const { setUser } = useAuth();
   const initialValues: FormValuesSignUp = {
-    username: "",
+    name: "",
     email: "",
     password: "",
-    confirmPassword: "",
   };
-  const onSubmit = async (values: FormValuesSignUp) => {
+
+  const onSubmit = async (values: FormValuesSignUp, action: any) => {
     try {
-      await auth().createUserWithEmailAndPassword(values.email, values.password);
-      alert("User created successfully");
+      await register.mutateAsync(values);
+      router.push("/sign-up/verify-email-address");
     } catch (error) {
-      console.log(error);
+      if (error instanceof Error && "code" in error) {
+        const firebaseError = error as { code: string; message: string };
+        if (firebaseError.code === "auth/email-already-in-use") {
+          action.setFieldError("email", "Email already in use");
+        }
+      }
+    }
+  };
+
+  const handleSignUpWithGoogle = async () => {
+    const res = await googleLoginMutation.mutateAsync();
+    if (res) {
+      if (res.needsLinking) {
+        showModal({
+          icon: "info",
+          title: "Email already in use",
+          message: "Please log in with the email and password that is connected to this account",
+          buttonStyle: { marginTop: 10 },
+          onConfirm: () => {
+            router.navigate("/sign-in");
+            router.setParams({ email: res.email });
+          },
+        });
+        return;
+      }
+      setUser(res.user as FirebaseAuthTypes.User);
+
+      router.replace("/home");
     }
   };
 
   return (
     <SafeAreaView
       style={{ backgroundColor: Colors.background }}
-      className="flex-1"
+      className="flex-1 "
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="justify-center flex-1 p-6">
-          <Logo />
+      <ScrollView>
+        <View className="p-6">
           <HeaderText
             title="Create an Account"
             description="Get started with our app today!"
           />
-
           <Formik
             initialValues={initialValues}
             validationSchema={SignupSchema}
@@ -48,6 +83,7 @@ export const SignUpScreen: React.FC = () => {
               <SignUpForm
                 {...formikProps}
                 isLoading={false}
+                handleSignUpWithGoogle={handleSignUpWithGoogle}
               />
             )}
           </Formik>
@@ -57,15 +93,9 @@ export const SignUpScreen: React.FC = () => {
             label="Sign In"
           />
         </View>
-        {/* {isLoading && (
-          <View style={overlayStyles.overlay}>
-            <ActivityIndicator
-              size="large"
-              color="#ffffff"
-            />
-          </View>
-        )} */}
       </ScrollView>
+
+      {(register.isPending || googleLoginMutation.isPending) && <LoadingScreen />}
     </SafeAreaView>
   );
-};
+});

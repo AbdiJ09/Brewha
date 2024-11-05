@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { PermissionResponse } from "expo-camera";
 import { ScrollView, View, Text, Pressable, Share } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -15,6 +15,9 @@ import ProfileAction from "@/components/profile/ProfileAction";
 import * as MediaLibrary from "expo-media-library";
 import { CameraIcon, PhotoIcon, ShareIcon, TrophyIcon, MapPinIcon, UserGroupIcon, FireIcon } from "react-native-heroicons/outline";
 import * as Linking from "expo-linking";
+import { useUserProfileQuery } from "@/hooks/useUserProfileQuery";
+import dynamicLinks from "@react-native-firebase/dynamic-links";
+import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 
 // Type definitions
 interface UserStats {
@@ -48,6 +51,8 @@ interface Challenge {
 
 const Profile = () => {
   const { linearGradientColors } = useProfileImage();
+  const { isLoading } = useUserProfileQuery();
+
   const { permission: permissionCamera, showModalPermission, setShowModalPermission, requestPermission } = useCameraPermissions();
   const { bottomSheetRef, openBottomSheet, renderBackdrop } = useBottomSheetModal();
 
@@ -128,9 +133,29 @@ const Profile = () => {
 
   // Share Profile Handler
   const handleShare = async () => {
+    const link = "https://brewha-c26d0.firebaseapp.com/profile";
     try {
-      await Share.share({
-        message: `Check out my coffee journey! I've visited ${userStats.cafesVisited} cafes and earned ${badges.filter((b) => b.achieved).length} badges! Level: ${userStats.level}`,
+      const dynamicLink = await dynamicLinks().buildShortLink({
+        link,
+        domainUriPrefix: "https://brewha.page.link",
+        social: {
+          title: "Share Profile",
+          descriptionText: "Check out my profile on Brewha",
+          imageUrl: "https://cdn.pixabay.com/photo/2021/07/21/12/50/website-6482988_1280.png",
+        },
+        android: {
+          packageName: "com.abdij09.brewha",
+        },
+
+        analytics: {
+          campaign: "profile",
+          content: "share",
+        },
+      });
+      Share.share({
+        message: `Check out my profile on Brewha: ${dynamicLink}`,
+        url: dynamicLink,
+        title: "Share Profile",
       });
     } catch (error) {
       console.error("Share error:", error);
@@ -165,7 +190,7 @@ const Profile = () => {
 
   const snapPoints = useMemo(() => ["30%"], []);
 
-  if (!permissionCamera || !permissionMediaLibrary) return <LoadingScreen />;
+  // if (!permissionCamera || !permissionMediaLibrary || isLoading) return <LoadingScreen />;
 
   return (
     <BottomSheetModalProvider>
@@ -308,35 +333,40 @@ const Profile = () => {
         </BottomSheetModal>
 
         {/* Permission Modals */}
-        <PermissionModal
-          icon={
-            <CameraIcon
-              size={48}
-              color={Colors.primary[500]}
-            />
-          }
-          title="Camera Access"
-          description="We need access to your camera to use this feature"
-          permission={permissionCamera as PermissionResponse}
-          visible={showModalPermission}
-          onClose={() => setShowModalPermission(false)}
-          onGrantPermission={requestPermission}
-        />
+        {!permissionCamera ||
+          (permissionMediaLibrary && (
+            <>
+              <PermissionModal
+                icon={
+                  <CameraIcon
+                    size={48}
+                    color={Colors.primary[500]}
+                  />
+                }
+                title="Camera Access"
+                description="We need access to your camera to use this feature"
+                permission={permissionCamera as PermissionResponse}
+                visible={showModalPermission}
+                onClose={() => setShowModalPermission(false)}
+                onGrantPermission={requestPermission}
+              />
 
-        <PermissionModal
-          icon={
-            <PhotoIcon
-              size={48}
-              color={Colors.primary[500]}
-            />
-          }
-          title="Gallery Access"
-          description="We need access to your gallery to use this feature"
-          permission={permissionMediaLibrary as MediaLibrary.EXPermissionResponse}
-          visible={showModalMediaLibraryPermission}
-          onClose={() => setShowModalMediaLibraryPermission(false)}
-          onGrantPermission={handleRequestPermissionMediaLibrary}
-        />
+              <PermissionModal
+                icon={
+                  <PhotoIcon
+                    size={48}
+                    color={Colors.primary[500]}
+                  />
+                }
+                title="Gallery Access"
+                description="We need access to your gallery to use this feature"
+                permission={permissionMediaLibrary as MediaLibrary.EXPermissionResponse}
+                visible={showModalMediaLibraryPermission}
+                onClose={() => setShowModalMediaLibraryPermission(false)}
+                onGrantPermission={handleRequestPermissionMediaLibrary}
+              />
+            </>
+          ))}
       </ScrollView>
     </BottomSheetModalProvider>
   );

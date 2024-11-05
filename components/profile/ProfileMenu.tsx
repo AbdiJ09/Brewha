@@ -28,7 +28,7 @@ const ProfileMenu = ({ menuItems }: { menuItems: ProfileMenu[] }) => {
                 color={item.color || Colors.text}
               />
             </View>
-            <Text className={`flex-1 ${item.color ? `text-${item.color}-500` : "text-foregroundText/80"}`}>{item.label}</Text>
+            <Text className={`flex-1 text-foregroundText/80`}>{item.label}</Text>
             {item.label !== "Log Out" && (
               <Ionicons
                 name="chevron-forward"

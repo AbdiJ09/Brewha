@@ -6,13 +6,10 @@ interface HeaderTextProps {
   description: string;
 }
 
-export const HeaderText: React.FC<HeaderTextProps> = ({
-  title,
-  description,
-}) => (
+export const HeaderText: React.FC<HeaderTextProps> = ({ title, description }) => (
   <>
     <Text
-      className="text-xl mb-2 text-center font-[Manrope-Bold]"
+      className="text-3xl mt-5 mb-4 text-center font-[Manrope-Bold]"
       style={{ color: Colors.text }}
     >
       {title}
